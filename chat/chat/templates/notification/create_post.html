@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create POST</title>
+</head>
+<body>
+        <label for="file_image">Bir Resim seçiniz.</label>
+        <input type="file" name="" id="file_image">
+        <input type="text" name="description" id="description">
+        <input type="submit" value="Post Oluştur" id="send">
+</body>
+
+<script>
+
+    document.addEventListener("DOMContentLoaded",()=> {
+
+        
+
+        let socket = new WebSocket(
+            "ws://" + window.location.host + "/ws/send-notification/"
+        )
+
+        socket.onmessage = function(e){
+            const data = JSON.parse(e);
+            console.log(data);
+        }
+
+        socket.onclose = function(e){
+            console.error("WebSocket closed unexpectedly!");
+        }
+
+        
+
+        socket.send(
+            JSON.stringify({
+                "description":description.value || "empty description"
+                })
+        )
+        description.value = "";
+
+    })
+
+    
+    let send_button = document.querySelector("#send");
+
+    let csrfToken = '{{csrf_token}}'
+
+    send_button.addEventListener("click",(event)=>{
+
+    event.preventDefault();
+    let description = document.querySelector("#description");
+
+    const formData = new FormData();
+    const fileField = document.querySelector('input[type="file"]');
+
+    formData.append("description",description.value);
+    formData.append("image",fileField.files[0]);
+
+    fetch("js/",{
+        method:"POST",
+        body:formData,
+        headers: new Headers({
+            'X-CSRFToken': csrfToken
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);
+    })
+})
+</script>
+
+</html>

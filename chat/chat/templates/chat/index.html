@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8"/>
+    <title>Chat Rooms</title>
+</head>
+<body>
+    
+    <div class="friends">
+        <ul>
+            {% for friend in friends %}
+            <li>
+                <a class="friend-chat-link" style="cursor: pointer;" data-id="{{friend.id}}"> {{friend.friend.user.username}} </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <script>
+        let friends = document.getElementsByClassName("friend-chat-link");
+        let friends_arr = Array.prototype.slice.call(friends);
+        friends_arr.forEach(element => {
+            element.addEventListener("click",(event)=> {
+                event.preventDefault();
+                friend_id = element.getAttribute("data-id");
+                fetch(`get-or-create-room/${friend_id}/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status == 200){
+                        room_id = data.room_id
+                        console.log(room_id)
+                        window.location.pathname = "/chat/" + room_id + "/";
+                    } else {
+                        alert(data.message)
+                    }
+                })
+            })
+        });
+
+    </script>
+</body>
+</html>
